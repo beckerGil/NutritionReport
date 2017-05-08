@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">NutritionReport</string>
+    <string name="display_report_button">DISPLAY NUTRITION REPORT</string>
+    <string name="amount_edit_text">amount in grams</string>
+    <string name="display_daily_report_button">DISPLAY REPORT</string>
+    <string name="choose_date_button">CHOOSE DATE</string>
+    <string name="nutrition_report_for_text">Nutrition Report for:</string>
 </resources>
