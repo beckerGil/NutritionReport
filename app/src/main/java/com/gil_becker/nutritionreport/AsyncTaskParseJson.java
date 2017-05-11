@@ -11,6 +11,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,6 +49,8 @@ public class AsyncTaskParseJson extends AsyncTask {
 
     Boolean done;
 
+    static Connection conn;
+
 
 
     public AsyncTaskParseJson(Context context , String itemNumber , List<String> foodNumbers) {
@@ -54,6 +59,7 @@ public class AsyncTaskParseJson extends AsyncTask {
         this.foodNumbers = foodNumbers;
         openHelper = new DBHelper(context);
         database = openHelper.getWritableDatabase();
+
     }
 
     @Override
@@ -63,16 +69,21 @@ public class AsyncTaskParseJson extends AsyncTask {
 
         jsonStringUrlFood = "https://api.nal.usda.gov/ndb/reports/?ndbno="+itemNumber+"&type=b&format=json&api_key="+ApiKey;
 
+
+
     }
 
 
     @Override
     protected Object doInBackground(Object[] params) {
 
-        System.out.println(TAG + "getting json data in background");
-        createFoodTable();
-        addFoodsToDB(foodNumbers);
-        openHelper.printTable(database,openHelper.TABLE_FOODS);
+            if (openHelper.tableExist(database, openHelper.TABLE_FOODS) == false) {
+                System.out.println(TAG + "getting json data in background");
+                createFoodTable();
+                addFoodsToDB(foodNumbers);
+            }
+        openHelper.printTable(database, openHelper.TABLE_FOODS);
+
         return null;
     }
 
@@ -126,7 +137,7 @@ public class AsyncTaskParseJson extends AsyncTask {
 
             database.execSQL(openHelper.createFoodTable(nutrientsName));
 
-            openHelper.printColumnNames(database, DBHelper.TABLE_FOODS);
+            openHelper.printColumnNames(database, openHelper.TABLE_FOODS);
 
         }
         catch (JSONException e) {
@@ -136,9 +147,11 @@ public class AsyncTaskParseJson extends AsyncTask {
     //==============================================================================================
 
     protected void addFoodsToDB(List<String> foodsNumber){
+        openHelper.prnt("addFoodsToDB");
         for (String foodndbno :
                 foodsNumber) {
             long newRowId = database.insert(openHelper.TABLE_FOODS, null, getFoodContent(foodndbno));
+            openHelper.prnt("newRowId = " + newRowId);
         }
     }
     //==============================================================================================

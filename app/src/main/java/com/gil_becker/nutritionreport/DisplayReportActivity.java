@@ -26,12 +26,14 @@ public class DisplayReportActivity extends AppCompatActivity {
         openHelper = new DBHelper(this);
         database = openHelper.getWritableDatabase();
 
+        openHelper.prnt("getAllConsumedFromTable = "+openHelper.getAllConsumedFromTable(database));
+
         //get today date
         String todayString = openHelper.currDate();
         //set date display
         TextView shownDate = (TextView) findViewById(R.id.shown_date);
         shownDate.setText(todayString);
-        openHelper.prnt("date:"+todayString);
+        openHelper.prnt("date: "+todayString);
         setViewForList(todayString);
     }
 

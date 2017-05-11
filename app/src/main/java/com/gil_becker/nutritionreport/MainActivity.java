@@ -19,13 +19,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
     private Context context;
+
+    String fileName = "DBExist";
 
     SQLiteDatabase database = null;
     DBHelper openHelper = null;
@@ -46,23 +51,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.deleteDatabase(dbName);
+
+//        this.deleteDatabase(dbName);
 
         openHelper = new DBHelper(this);
         database = openHelper.getWritableDatabase();
+
         List<String> foodNumbers = new ArrayList<>();
-        for (int i=1 ; i<11 ; i++){
+        for (int i=1 ; i<10 ; i++){
             Random rnd = new Random();
             String number = "0100"+i;
             foodNumbers.add(number);
         }
-//        foodNumbers.add("01009");
-//        foodNumbers.add("01010");
+
         AsyncTaskParseJson taskParseJson = new AsyncTaskParseJson(this , "01009" , foodNumbers);
 
         taskParseJson.setHandler(handler);
 
         taskParseJson.execute();
+
+
 
 //        openHelper.addFoodItemRecord(database, 1 , "Blue Cheese" , 353 , 28.75 , 21.4 , 2.34 , 0.0 , 198 , 2.66);
 //        openHelper.addFoodItemRecord(database, 2 , "Milk chocolate" , 67 , 0 , 3.39 , 13.46 , 1.0 , 64 , 0.41);
@@ -82,12 +90,7 @@ public class MainActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
 
         }
-    //============================================================================
-    private static boolean doesDatabaseExist(Context context, String dbName) {
-            File dbFile = context.getDatabasePath(dbName);
-            System.out.println("gil: context.getDatabasePath(dbName)="+context.getDatabasePath(dbName));
-            return dbFile.exists();
-            }
+
     //============================================================================
         void prnt(Object object){
         System.out.println("gil: "+object);
@@ -138,9 +141,10 @@ public class MainActivity extends AppCompatActivity {
                             Toast.LENGTH_LONG).show();
 
                     // the date of the new ConsumedFood object is today's date
-                    String curentDate = openHelper.currDate();
+                    String currentDate = openHelper.currDate();
                     // Add the new consumed food to the consumedfoods table
-                    openHelper.addConsumedItemRecord(database, stFoodName, foodAmount, curentDate);
+                    openHelper.addConsumedItemRecord(database, stFoodName, foodAmount, currentDate);
+                    openHelper.printTable(database,DBHelper.TABLE_CONSUMED_FOODS);
                     // Clear the old user input from the EditText
                     et.setText("");
                 }
@@ -174,4 +178,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 }

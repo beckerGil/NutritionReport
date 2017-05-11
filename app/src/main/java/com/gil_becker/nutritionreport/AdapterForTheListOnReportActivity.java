@@ -33,7 +33,7 @@ public class AdapterForTheListOnReportActivity extends BaseAdapter {
         while (i.hasNext()){
             mData.add((Map.Entry)i.next());
         }
-        System.out.println("gil:mData= "+mData);
+        System.out.println("gil: mData= "+mData);
     }
 
     @Override
@@ -73,10 +73,16 @@ public class AdapterForTheListOnReportActivity extends BaseAdapter {
         HashMap.Entry <String, Float> item = getItem(position);
         TextView nutritionTitle = (TextView)v.findViewById(R.id.foodName);
         TextView amountTitle = (TextView)v.findViewById(R.id.consumed_amount);
-        nutritionTitle.setText(item.getKey().toString()+" = ");
-        Float f = (Float)0.0f;
+        nutritionTitle.setText(item.getKey().toString());
+        Float f = 0.0f;
         f=item.getValue();
-        amountTitle.setText(f.toString());
+        String s = f.toString();
+        StringBuilder s2 = new StringBuilder();
+        int dot = s.indexOf('.')+1;
+        for (int i = 0 ; i <= dot ; i++) {
+            s2.append(s.charAt(i));
+        }
+        amountTitle.setText(s2.toString());
 //        TextView consumedAmount = (TextView)v.findViewById(R.id.consumed_amount);
 
         return v;

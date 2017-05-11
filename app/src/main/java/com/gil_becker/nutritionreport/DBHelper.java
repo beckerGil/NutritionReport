@@ -4,8 +4,10 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,11 +27,11 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 1;
 
-    private static final String DATABASE_NAME = "nutritionDB";
+    protected static final String DATABASE_NAME = "nutritionDB";
 
     // Tables Names
-    static final String TABLE_FOODS = "foods";
-    private static final String TABLE_CONSUMED_FOODS = "consumedfoods";
+    final String TABLE_FOODS = "foods";
+    protected static final String TABLE_CONSUMED_FOODS = "consumedfoods";
 
     // FOODS Table - column names
     private static final String COLUMN_FOOD_ID = "_id"; //The column type is int, UNIQUE
@@ -41,7 +43,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private static final String COLUMN_CONSUMEDFOOD_NAME = "name"; //text, FOREIGN KEY
     private static final String COLUMN_CONSUMEDFOOD_AMOUNT = "amount";// type is int
 
-    private static final String CREATE_TABLE_CONSUMED_FOODS =
+    private final String CREATE_TABLE_CONSUMED_FOODS =
             "CREATE TABLE " + TABLE_CONSUMED_FOODS + "("
                     + COLUMN_CONSUMEDFOOD_ID + " INTEGER PRIMARY KEY, "
                     + COLUMN_CONSUMEDFOOD_CREATED_AT + " INT, "
@@ -53,10 +55,32 @@ public class DBHelper extends SQLiteOpenHelper {
     void prnt(Object object) {
         System.out.println("gil: " + object);
     }
-//=========================================================================
 
+    //=========================================================================
+
+    protected boolean DatabaseExist(Context context, String dbName) {
+        File dbFile = context.getDatabasePath(dbName);
+        System.out.println("gil: context.getDatabasePath(dbName)="+context.getDatabasePath(dbName));
+        return dbFile.exists();
+    }
+
+    //============================================================================
+
+    protected boolean tableExist (SQLiteDatabase database , String table){
+        boolean flag = false;
+        try {
+            Cursor tableCursor = database.rawQuery("SELECT * FROM " + table, null);
+            if (tableCursor.moveToFirst()) flag = true;
+        }
+        catch (RuntimeException e){
+            prnt(e);
+        }
+        return flag;
+    }
+
+    //============================================================================
     /**
-     * create String for execute CREATE SQL
+     * create String for execute CREATE SQL TABLE
      * @param nutrients list (from random food report got from USDA web site)
      * @return string
      */
@@ -65,7 +89,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
         StringBuilder createTableFood = new StringBuilder();
 
-        String part1 = "CREATE TABLE "
+        String part1 = "CREATE TABLE IF NOT EXISTS "
                 + TABLE_FOODS + " ("
                 + COLUMN_FOOD_ID + " INTEGER UNIQUE, "
                 + COLUMN_FOOD_NAME + " TEXT PRIMARY KEY, ";
@@ -123,6 +147,13 @@ public class DBHelper extends SQLiteOpenHelper {
     }
     //=========================================================================
 
+//    public long addFoodItemRecord(SQLiteDatabase , ArrayList<String>foodItem ){
+//
+//        return ;
+//    }
+
+    //==========================================================================
+
     public void printColumnNames(SQLiteDatabase db , String table) {
         Cursor cursor = db.rawQuery("SELECT * FROM " + table, null);
         String str[] = cursor.getColumnNames();
@@ -161,10 +192,10 @@ public class DBHelper extends SQLiteOpenHelper {
    /**
      * Getting all food records from the Table
      */
-    public List<FoodItem> getAllFoodItemsFromTheTable(SQLiteDatabase db) {
+    public List<FoodItem> getAllFoodItemsFromTheTable(SQLiteDatabase db , String table) {
 
         List<FoodItem> foodItemsList = new ArrayList<FoodItem>();
-        String selectQuery = "SELECT  * FROM " + TABLE_FOODS;
+        String selectQuery = "SELECT  * FROM " + table;
         Cursor c = db.rawQuery(selectQuery, null);
         if (c.moveToFirst()) {
             while (!c.isAfterLast()) {
@@ -186,7 +217,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void printTable (SQLiteDatabase database , String table) {
         Cursor cursor = database.rawQuery("SELECT * FROM " + table , null);
-        prnt(table);
+        prnt("tabel name : "+table);
 //        System.out.println("gil: cursor.getColumnNames()"+cursor.getColumnNames().length);
         ArrayList<String> columns = new ArrayList<>();
         for (String column:cursor.getColumnNames()) {
@@ -298,6 +329,8 @@ public class DBHelper extends SQLiteOpenHelper {
                 TABLE_FOODS + " ; ";
         Cursor foodNutritionCursor = db.rawQuery(findFood, null);
         if (foodNutritionCursor.moveToFirst()) foodNutritionCursor.moveToFirst();
+        printCursorToConsole(foodNutritionCursor);
+        prnt("----------------------------------");
         String[] nutritionName = foodNutritionCursor.getColumnNames();
         HashMap<String , Float> nutritionMap = new HashMap();
         for (int i = 0; i < nutritionName.length; i++) {
@@ -307,7 +340,7 @@ public class DBHelper extends SQLiteOpenHelper {
             }
         }
         foodNutritionCursor.close();
-        prnt("nutritionMap= " + nutritionMap);
+        prnt("nutritionMap = " + nutritionMap);
         return nutritionMap;
     }
 

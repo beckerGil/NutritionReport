@@ -7,16 +7,17 @@
 
     <TextView
         android:id="@+id/foodName"
-        android:layout_width="wrap_content"
+        android:layout_width="187dp"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="16sp" />
+        android:textSize="18sp"
+        android:layout_weight="0.66" />
 
     <TextView
         android:id="@+id/consumed_amount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:textSize="16sp" />
+        android:layout_weight="0.35"
+        android:textAlignment="viewEnd"
+        android:textSize="20sp" />
 
 </LinearLayout>
